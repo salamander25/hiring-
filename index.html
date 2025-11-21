@@ -523,13 +523,28 @@
       position: relative;
       border-radius: 18px;
       border: 1px solid rgba(212, 175, 55, 0.35);
-      min-height: 320px;
+      aspect-ratio: 4 / 3;
+      min-height: 360px;
       overflow: hidden;
       background:
-        radial-gradient(circle at 25% 15%, rgba(212, 175, 55, 0.18) 0, transparent 45%),
-        radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.12) 0, transparent 40%),
-        radial-gradient(circle at 50% 95%, rgba(212, 175, 55, 0.08) 0, transparent 50%),
-        linear-gradient(135deg, #0d0d0d, #050505 70%);
+        radial-gradient(circle at 15% 12%, rgba(212, 175, 55, 0.18), transparent 42%),
+        radial-gradient(circle at 70% 12%, rgba(212, 175, 55, 0.14), transparent 44%),
+        linear-gradient(150deg, #0f0f0f 0%, #060606 70%);
+      background-repeat: no-repeat, no-repeat, no-repeat;
+      background-position: 15% 12%, 70% 12%, center;
+      background-size: 150% 150%, 140% 140%, cover;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      isolation: isolate;
+    }
+
+    .map-embed {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      filter: saturate(0.9) brightness(0.9);
+      z-index: 1;
     }
 
     .map-gridlines {
@@ -556,10 +571,34 @@
 
     .map-dots {
       position: relative;
-      z-index: 2;
+      z-index: 3;
       inset: 0;
       width: 100%;
       height: 100%;
+    }
+
+    .map-labels {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      font-family: "Raleway", sans-serif;
+    }
+
+    .map-label {
+      position: absolute;
+      left: calc(var(--l) + 2%);
+      top: var(--t);
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.82);
+      border: 1px solid rgba(212, 175, 55, 0.65);
+      color: var(--gold-soft);
+      padding: 0.22rem 0.46rem;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.45);
     }
 
     .map-dot {
@@ -580,6 +619,9 @@
         0 0 0 6px rgba(212, 175, 55, 0.12),
         0 12px 26px rgba(0, 0, 0, 0.45);
       transform: translate(-50%, -50%);
+      animation: mapPulse 3.2s ease-in-out infinite;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      outline: none;
     }
 
     .map-dot::after {
@@ -596,10 +638,74 @@
       color: var(--gold-soft);
       border: 1px solid rgba(212, 175, 55, 0.5);
       box-shadow: 0 0 0 6px rgba(212, 175, 55, 0.08), 0 12px 26px rgba(0, 0, 0, 0.35);
+      animation: none;
     }
 
     .map-dot.upcoming::after {
       border-color: rgba(212, 175, 55, 0.3);
+    }
+
+    .map-dot::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 50%;
+      top: -0.5rem;
+      transform: translate(-50%, -120%);
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.65);
+      color: var(--gold-soft);
+      padding: 0.25rem 0.45rem;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.14s ease, transform 0.14s ease;
+      z-index: 4;
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .map-dot:hover,
+    .map-dot:focus-visible {
+      transform: translate(-50%, -50%) scale(1.05);
+      box-shadow:
+        0 0 0 7px rgba(212, 175, 55, 0.2),
+        0 15px 32px rgba(0, 0, 0, 0.55);
+    }
+
+    .map-dot:hover::before,
+    .map-dot:focus-visible::before {
+      opacity: 1;
+      transform: translate(-50%, -130%);
+    }
+
+    .map-dots.show-labels .map-dot::before {
+      opacity: 1;
+      transform: translate(-50%, -150%);
+    }
+
+    .map-dot:focus-visible {
+      outline: 2px solid rgba(212, 175, 55, 0.7);
+      outline-offset: 2px;
+    }
+
+    @keyframes mapPulse {
+      0% {
+        box-shadow:
+          0 0 0 6px rgba(212, 175, 55, 0.14),
+          0 12px 26px rgba(0, 0, 0, 0.45);
+      }
+      50% {
+        box-shadow:
+          0 0 0 10px rgba(212, 175, 55, 0.04),
+          0 12px 26px rgba(0, 0, 0, 0.45);
+      }
+      100% {
+        box-shadow:
+          0 0 0 6px rgba(212, 175, 55, 0.14),
+          0 12px 26px rgba(0, 0, 0, 0.45);
+      }
     }
 
     .map-legend {
@@ -1273,31 +1379,63 @@
           <div class="map-grid">
             <div class="map-card">
               <div class="map-visual">
+                <iframe
+                  class="map-embed"
+                  title="United States map"
+                  src="https://www.google.com/maps?q=United%20States&output=embed&z=4"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
                 <div class="map-gridlines"></div>
                 <div class="map-overlay"></div>
                 <div class="map-dots" aria-label="Coverage map">
                   <!-- Active -->
-                  <div class="map-dot" style="--l:16%; --t:58%;" aria-label="California">CA</div>
-                  <div class="map-dot" style="--l:22%; --t:56%;" aria-label="Nevada">NV</div>
-                  <div class="map-dot" style="--l:24%; --t:64%;" aria-label="Arizona">AZ</div>
-                  <div class="map-dot" style="--l:28%; --t:58%;" aria-label="Utah">UT</div>
-                  <div class="map-dot" style="--l:32%; --t:54%;" aria-label="Colorado">CO</div>
-                  <div class="map-dot" style="--l:32%; --t:67%;" aria-label="New Mexico">NM</div>
-                  <div class="map-dot" style="--l:44%; --t:70%;" aria-label="Texas">TX</div>
-                  <div class="map-dot" style="--l:52%; --t:45%;" aria-label="Illinois">IL</div>
-                  <div class="map-dot" style="--l:78%; --t:57%;" aria-label="North Carolina">NC</div>
-                  <div class="map-dot" style="--l:70%; --t:75%;" aria-label="Florida">FL</div>
+                  <div class="map-dot" style="--l:16%; --t:58%;" aria-label="California" data-label="California - Active" tabindex="0">CA</div>
+                  <div class="map-dot" style="--l:22%; --t:56%;" aria-label="Nevada" data-label="Nevada - Active" tabindex="0">NV</div>
+                  <div class="map-dot" style="--l:24%; --t:64%;" aria-label="Arizona" data-label="Arizona - Active" tabindex="0">AZ</div>
+                  <div class="map-dot" style="--l:28%; --t:58%;" aria-label="Utah" data-label="Utah - Active" tabindex="0">UT</div>
+                  <div class="map-dot" style="--l:32%; --t:54%;" aria-label="Colorado" data-label="Colorado - Active" tabindex="0">CO</div>
+                  <div class="map-dot" style="--l:32%; --t:67%;" aria-label="New Mexico" data-label="New Mexico - Active" tabindex="0">NM</div>
+                  <div class="map-dot" style="--l:44%; --t:70%;" aria-label="Texas" data-label="Texas - Active" tabindex="0">TX</div>
+                  <div class="map-dot" style="--l:52%; --t:45%;" aria-label="Illinois" data-label="Illinois - Active" tabindex="0">IL</div>
+                  <div class="map-dot" style="--l:78%; --t:57%;" aria-label="North Carolina" data-label="North Carolina - Active" tabindex="0">NC</div>
+                  <div class="map-dot" style="--l:70%; --t:75%;" aria-label="Florida" data-label="Florida - Active" tabindex="0">FL</div>
 
                   <!-- Opening Next -->
-                  <div class="map-dot upcoming" style="--l:68%; --t:65%;" aria-label="Georgia">GA</div>
-                  <div class="map-dot upcoming" style="--l:73%; --t:63%;" aria-label="South Carolina">SC</div>
-                  <div class="map-dot upcoming" style="--l:78%; --t:52%;" aria-label="Virginia">VA</div>
-                  <div class="map-dot upcoming" style="--l:75%; --t:44%;" aria-label="Pennsylvania">PA</div>
-                  <div class="map-dot upcoming" style="--l:46%; --t:57%;" aria-label="Missouri">MO</div>
-                  <div class="map-dot upcoming" style="--l:52%; --t:35%;" aria-label="Wisconsin">WI</div>
-                  <div class="map-dot upcoming" style="--l:48%; --t:28%;" aria-label="Minnesota">MN</div>
-                  <div class="map-dot upcoming" style="--l:42%; --t:63%;" aria-label="Oklahoma">OK</div>
-                  <div class="map-dot upcoming" style="--l:39%; --t:57%;" aria-label="Kansas">KS</div>
+                  <div class="map-dot upcoming" style="--l:68%; --t:65%;" aria-label="Georgia" data-label="Georgia - Opening Next" tabindex="0">GA</div>
+                  <div class="map-dot upcoming" style="--l:73%; --t:63%;" aria-label="South Carolina" data-label="South Carolina - Opening Next" tabindex="0">SC</div>
+                  <div class="map-dot upcoming" style="--l:78%; --t:52%;" aria-label="Virginia" data-label="Virginia - Opening Next" tabindex="0">VA</div>
+                  <div class="map-dot upcoming" style="--l:75%; --t:44%;" aria-label="Pennsylvania" data-label="Pennsylvania - Opening Next" tabindex="0">PA</div>
+                  <div class="map-dot upcoming" style="--l:46%; --t:57%;" aria-label="Missouri" data-label="Missouri - Opening Next" tabindex="0">MO</div>
+                  <div class="map-dot upcoming" style="--l:52%; --t:35%;" aria-label="Wisconsin" data-label="Wisconsin - Opening Next" tabindex="0">WI</div>
+                  <div class="map-dot upcoming" style="--l:48%; --t:28%;" aria-label="Minnesota" data-label="Minnesota - Opening Next" tabindex="0">MN</div>
+                  <div class="map-dot upcoming" style="--l:42%; --t:63%;" aria-label="Oklahoma" data-label="Oklahoma - Opening Next" tabindex="0">OK</div>
+                  <div class="map-dot upcoming" style="--l:39%; --t:57%;" aria-label="Kansas" data-label="Kansas - Opening Next" tabindex="0">KS</div>
+                </div>
+
+                <div class="map-labels" aria-hidden="true">
+                  <!-- Active Labels -->
+                  <div class="map-label" style="--l:16%; --t:58%;">California — Active</div>
+                  <div class="map-label" style="--l:22%; --t:56%;">Nevada — Active</div>
+                  <div class="map-label" style="--l:24%; --t:64%;">Arizona — Active</div>
+                  <div class="map-label" style="--l:28%; --t:58%;">Utah — Active</div>
+                  <div class="map-label" style="--l:32%; --t:54%;">Colorado — Active</div>
+                  <div class="map-label" style="--l:32%; --t:67%;">New Mexico — Active</div>
+                  <div class="map-label" style="--l:44%; --t:70%;">Texas — Active</div>
+                  <div class="map-label" style="--l:52%; --t:45%;">Illinois — Active</div>
+                  <div class="map-label" style="--l:78%; --t:57%;">North Carolina — Active</div>
+                  <div class="map-label" style="--l:70%; --t:75%;">Florida — Active</div>
+
+                  <!-- Opening Next Labels -->
+                  <div class="map-label" style="--l:68%; --t:65%;">Georgia — Opening Next</div>
+                  <div class="map-label" style="--l:73%; --t:63%;">South Carolina — Opening Next</div>
+                  <div class="map-label" style="--l:78%; --t:52%;">Virginia — Opening Next</div>
+                  <div class="map-label" style="--l:75%; --t:44%;">Pennsylvania — Opening Next</div>
+                  <div class="map-label" style="--l:46%; --t:57%;">Missouri — Opening Next</div>
+                  <div class="map-label" style="--l:52%; --t:35%;">Wisconsin — Opening Next</div>
+                  <div class="map-label" style="--l:48%; --t:28%;">Minnesota — Opening Next</div>
+                  <div class="map-label" style="--l:42%; --t:63%;">Oklahoma — Opening Next</div>
+                  <div class="map-label" style="--l:39%; --t:57%;">Kansas — Opening Next</div>
                 </div>
 
                 <div class="map-legend">
